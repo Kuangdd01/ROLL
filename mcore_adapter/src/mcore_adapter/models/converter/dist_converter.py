@@ -144,8 +144,9 @@ shared_moe_dist_config = DistParallelConfig(
 )
 
 
+# test
 register_dist_config(
-    ["qwen2_moe", "qwen3_moe"],
+    ["qwen2_moe", "qwen3_moe", "glm4_moe"],
     default_dist_config.merge_configs(shared_moe_dist_config),
 )
 
