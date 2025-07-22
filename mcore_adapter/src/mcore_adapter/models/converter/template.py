@@ -681,7 +681,7 @@ register_template(
         RenameConverOp(
             hf_names=".mlp.shared_expert.down_proj.weight", mca_names=".mlp.shared_experts.linear_fc2.weight"
         ),
-        # RenameConverOp(hf_names=".mlp.gate.e_score_correction_bias", mca_names=".mlp.router.e_score_correction_bias"),
+        RenameConverOp(hf_names=".mlp.gate.e_score_correction_bias", mca_names=".mlp.router.e_score_correction_bias"),
         QKVConverOp(
             hf_names=[".self_attn.q_proj.weight", ".self_attn.k_proj.weight", ".self_attn.v_proj.weight"],
             mca_names=".self_attention.linear_qkv.weight",
