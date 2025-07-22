@@ -5,7 +5,6 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Sequence, Tuple
 
-import torch
 from filelock import FileLock
 from huggingface_hub import snapshot_download
 from llamafactory.data import get_dataset, get_template_and_fix_tokenizer

@@ -625,6 +625,73 @@ register_template(
 
 
 register_template(
+    "glm4_moe",
+    hf_layer_prefix="model.layers.",
+    hf_moe_prefix=".mlp.experts.",
+    config_hf_to_mca={
+        "max_position_embeddings": "max_position_embeddings",
+        "hidden_size": "hidden_size",
+        "attention_bias": "add_qkv_bias",
+        "head_dim": "kv_channels",
+        "num_attention_heads": "num_attention_heads",
+        "num_key_value_heads": "num_query_groups",
+        "num_hidden_layers": "num_layers",
+        "rms_norm_eps": "layernorm_epsilon",
+        "vocab_size": "padded_vocab_size",
+        "attention_dropout": "attention_dropout",
+        "rope_theta": "rotary_base",
+        "intermediate_size": "ffn_hidden_size",
+        "tie_word_embeddings": "tie_embeddings_and_output_weights",
+        # MoE related
+        "moe_intermediate_size": "moe_ffn_hidden_size",
+        "decoder_sparse_step": "moe_layer_freq",
+        "n_routed_experts": "num_moe_experts", # diff
+        "num_experts_per_tok": "moe_router_topk",
+        # "router_aux_loss_coef": "moe_aux_loss_coeff",
+    },
+    constant_mca_config={
+        "swiglu": True,
+        "position_embedding_type": "rope",
+        "normalization": "RMSNorm",
+        "add_bias_linear": False,
+        # "hidden_dropout": 0.0,
+        "rotary_percent": 1.0,
+        "moe_router_load_balancing_type": "seq_aux_loss",
+        "moe_router_pre_softmax": False,
+        "qk_layernorm": False,
+    },
+    weight_converters=[
+        RenameConverOp(hf_names="lm_head.weight", mca_names="output_layer.weight"),
+        RenameConverOp(hf_names="model.embed_tokens.weight", mca_names="embedding.word_embeddings.weight"),
+        RenameConverOp(hf_names=".input_layernorm.weight", mca_names=".self_attention.linear_qkv.layer_norm_weight"),
+        RenameConverOp(hf_names=".self_attn.o_proj.weight", mca_names=".self_attention.linear_proj.weight"),
+        RenameConverOp(hf_names=".post_attention_layernorm.weight", mca_names=".pre_mlp_layernorm.weight"),
+        RenameConverOp(hf_names=".down_proj.weight", mca_names=".linear_fc2.weight"),
+        RenameConverOp(hf_names="model.norm.weight", mca_names="decoder.final_layernorm.weight"),
+        StackConverOp(hf_names=[".gate_proj.weight", ".up_proj.weight"], mca_names=".linear_fc1.weight", dim=0),
+        RenameConverOp(hf_names=".mlp.gate.weight", mca_names=".mlp.router.weight"),
+        StackConverOp( # for shared
+            hf_names=[".mlp.shared_expert.gate_proj.weight", ".mlp.shared_expert.up_proj.weight"],
+            mca_names=".mlp.shared_experts.linear_fc1.weight",
+            dim=0,
+        ),
+        RenameConverOp(
+            hf_names=".mlp.shared_expert.down_proj.weight", mca_names=".mlp.shared_experts.linear_fc2.weight"
+        ),
+        # RenameConverOp(hf_names=".mlp.gate.e_score_correction_bias", mca_names=".mlp.router.e_score_correction_bias"),
+        QKVConverOp(
+            hf_names=[".self_attn.q_proj.weight", ".self_attn.k_proj.weight", ".self_attn.v_proj.weight"],
+            mca_names=".self_attention.linear_qkv.weight",
+        ),
+        QKVBiasConverOp(
+            hf_names=[".self_attn.q_proj.bias", ".self_attn.k_proj.bias", ".self_attn.v_proj.bias"],
+            mca_names=".self_attention.linear_qkv.bias",
+        ),
+    ],
+)
+
+
+register_template(
     "qwen3_moe",
     hf_layer_prefix="model.layers.",
     hf_moe_prefix=".mlp.experts.",

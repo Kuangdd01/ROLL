@@ -7,8 +7,8 @@ from transformers.configuration_utils import CONFIG_NAME as HF_CONFIG_NAME
 from ...constants import MCA_CONFIG_NAME
 from ...utils import get_logger
 from ..model_config import McaModelConfig
-from ..qwen2_vl import Qwen2VLConfig
 from ..qwen2_5_vl import Qwen2_5_VLConfig
+from ..qwen2_vl import Qwen2VLConfig
 
 
 logger = get_logger(__name__)
@@ -22,6 +22,7 @@ CONFIG_MAPPING_NAMES = {
     "qwen3_moe": McaModelConfig,
     "qwen2_vl": Qwen2VLConfig,
     "qwen2_5_vl": Qwen2_5_VLConfig,
+    "glm4_moe": McaModelConfig,
 }
 
 

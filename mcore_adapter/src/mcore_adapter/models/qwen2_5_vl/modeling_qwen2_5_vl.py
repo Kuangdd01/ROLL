@@ -72,7 +72,7 @@ class Qwen2_5_VLRotaryEmbedding(nn.Module): # same as Qwen2_VL
         with torch.autocast(device_type=device_type, enabled=False):
             freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(2, 3)
             emb = torch.cat((freqs, freqs), dim=-1)
-        return emb   
+        return emb
 
 class Qwen2_5_VLAttention(SelfAttention): # replace rotary_pos_emb by Qwen2.5VL multimodal_rotary_pos_emb
     def forward(
