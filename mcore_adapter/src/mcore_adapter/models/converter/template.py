@@ -673,13 +673,13 @@ register_template(
         RenameConverOp(hf_names="model.norm.weight", mca_names="decoder.final_layernorm.weight"),
         StackConverOp(hf_names=[".gate_proj.weight", ".up_proj.weight"], mca_names=".linear_fc1.weight", dim=0),
         RenameConverOp(hf_names=".mlp.gate.weight", mca_names=".mlp.router.weight"),
-        StackConverOp( # for shared
-            hf_names=[".mlp.shared_expert.gate_proj.weight", ".mlp.shared_expert.up_proj.weight"],
+        StackConverOp(
+            hf_names=[".mlp.shared_experts.gate_proj.weight", ".mlp.shared_experts.up_proj.weight"],
             mca_names=".mlp.shared_experts.linear_fc1.weight",
             dim=0,
         ),
         RenameConverOp(
-            hf_names=".mlp.shared_expert.down_proj.weight", mca_names=".mlp.shared_experts.linear_fc2.weight"
+            hf_names=".mlp.shared_experts.down_proj.weight", mca_names=".mlp.shared_experts.linear_fc2.weight"
         ),
         RenameConverOp(hf_names=".mlp.gate.e_score_correction_bias", mca_names=".mlp.router.e_score_correction_bias"),
         QKVConverOp(
