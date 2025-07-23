@@ -283,6 +283,8 @@ class McaGPTModel(GPTModel, PretrainedModel):
     def _get_transformer_layer_spec(self, config: Optional["McaModelConfig"]=None):
         config = config or self.config
         use_te = config.transformer_impl == "transformer_engine"
+        if config.hf_model_type == "glm4_moe":
+            config.moe_layer_freq = [0] + [1] * (config.num_layers - 1)
         if config.num_moe_experts:
             transformer_block_spec = get_gpt_decoder_block_spec(config, use_transformer_engine=use_te)
             if not use_te and config.normalization == "RMSNorm":
@@ -293,10 +295,12 @@ class McaGPTModel(GPTModel, PretrainedModel):
                     transformer_layer_spec.submodules.pre_mlp_layernorm = RMSNorm
                 if hasattr(transformer_layer_spec.submodules.mlp.submodules, "shared_experts"):
                     logger.info("here find shared_experts...") # for debug
-                    config.moe_shared_expert_intermediate_size = 1408 # hard code here # FIXME
-                    config.moe_router_enable_expert_bias = True
-                    # glm4moe don't have share gate
-                    # transformer_layer_spec.submodules.mlp.submodules.shared_experts.params["gate"] = config.moe_use_shared_expert_gate
+                    if config.hf_model_type == "glm4_moe":
+                        config.moe_shared_expert_intermediate_size = 1408 # hard code here # FIXME
+                        config.moe_router_enable_expert_bias = True
+                    else: # for qwen2_moe
+                        transformer_layer_spec.submodules.mlp.submodules.shared_experts.params["gate"] = config.moe_use_shared_expert_gate
+
             return transformer_block_spec
         if use_te:
             return get_gpt_layer_with_transformer_engine_spec(config.num_moe_experts, config.moe_grouped_gemm, qk_layernorm=config.qk_layernorm)
