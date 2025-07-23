@@ -158,7 +158,7 @@ register_dist_config(
 
 register_dist_config(
     ["glm4_moe"],
-    glm_shared_moe_dist_config.merge_configs(shared_moe_dist_config)
+    default_dist_config.merge_configs(glm_shared_moe_dist_config)
 )
 
 register_dist_config(
