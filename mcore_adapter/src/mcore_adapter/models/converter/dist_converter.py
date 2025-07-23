@@ -143,13 +143,23 @@ shared_moe_dist_config = DistParallelConfig(
     te_to_local_key_map={".pre_mlp_layernorm.weight": ".pre_mlp_layernorm.weight"},
 )
 
+glm_shared_moe_dist_config = DistParallelConfig(
+    duplicated_weights=[".mlp.shared_experts.gate_weight", ".mlp.router.expert_bias"],
+    row_parallel_weights=[".mlp.shared_experts.linear_fc2.weight"],
+    swiglu_weights=[".mlp.shared_experts.linear_fc1.weight"],
+    te_to_local_key_map={".pre_mlp_layernorm.weight": ".pre_mlp_layernorm.weight"},
+)
 
 # test
 register_dist_config(
-    ["qwen2_moe", "qwen3_moe", "glm4_moe"],
+    ["qwen2_moe", "qwen3_moe"],
     default_dist_config.merge_configs(shared_moe_dist_config),
 )
 
+register_dist_config(
+    ["glm4_moe"],
+    glm_shared_moe_dist_config.merge_configs(shared_moe_dist_config)
+)
 
 register_dist_config(
     ["qwen2_vl", "qwen2_5_vl"],
