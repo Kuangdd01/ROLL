@@ -292,7 +292,11 @@ class McaGPTModel(GPTModel, PretrainedModel):
                     transformer_layer_spec.submodules.input_layernorm = RMSNorm
                     transformer_layer_spec.submodules.pre_mlp_layernorm = RMSNorm
                 if hasattr(transformer_layer_spec.submodules.mlp.submodules, "shared_experts"):
-                    transformer_layer_spec.submodules.mlp.submodules.shared_experts.params["gate"] = config.moe_use_shared_expert_gate
+                    logger.info("here find shared_experts...") # for debug
+                    config.moe_shared_expert_intermediate_size = 1408 # hard code here # FIXME
+                    config.moe_router_enable_expert_bias = True
+                    # glm4moe don't have share gate
+                    # transformer_layer_spec.submodules.mlp.submodules.shared_experts.params["gate"] = config.moe_use_shared_expert_gate
             return transformer_block_spec
         if use_te:
             return get_gpt_layer_with_transformer_engine_spec(config.num_moe_experts, config.moe_grouped_gemm, qk_layernorm=config.qk_layernorm)
