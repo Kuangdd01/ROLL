@@ -264,7 +264,7 @@ class McaGPTModel(GPTModel, PretrainedModel):
         if config.hf_model_type == "glm4_moe":
             from megatron.core.transformer.identity_op import IdentityOp
             from megatron.core.extensions.transformer_engine import TENorm
-            first_layer = transformer_layer_spec[0]
+            first_layer = transformer_layer_spec.layer_specs[0]
             if getattr(first_layer.submodules, "pre_mlp_layernorm", None) == IdentityOp:
                 logger.info("replacing the norm weight in the first layer...")
                 setattr(first_layer.submodules, "pre_mlp_layernorm", TENorm) # patch
