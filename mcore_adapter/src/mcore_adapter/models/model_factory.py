@@ -51,9 +51,6 @@ class VirtualModels:
         return self.models[0].save_pretrained(save_directory, state_dict=state_dict)
 
     def load_state_dict(self, state_dict: Dict[str, torch.Tensor], strict: bool = True):
-        print(state_dict)
-        print("-"*50)
-        print(self.models)
         if len(self.models) == 1:
             if "model" in state_dict:
                 state_dict = state_dict["model"]
