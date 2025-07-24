@@ -265,6 +265,10 @@ class McaGPTModel(GPTModel, PretrainedModel):
 
     def __init__(self, config: "McaModelConfig", **kwargs):
         transformer_layer_spec = self._get_transformer_layer_spec(config)
+        if torch.distributed.get_rank() == 0:
+                breakpoint()
+        else:
+            torch.distributed.barrier()
         # here we need to specific ops for glm4moe
         if config.hf_model_type == "glm4_moe":
             from megatron.core.transformer.identity_op import IdentityOp
