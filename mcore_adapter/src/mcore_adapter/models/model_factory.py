@@ -51,6 +51,9 @@ class VirtualModels:
         return self.models[0].save_pretrained(save_directory, state_dict=state_dict)
 
     def load_state_dict(self, state_dict: Dict[str, torch.Tensor], strict: bool = True):
+        print(state_dict)
+        print("-"*50)
+        print(self.models)
         if len(self.models) == 1:
             if "model" in state_dict:
                 state_dict = state_dict["model"]
@@ -292,7 +295,7 @@ class McaGPTModel(GPTModel, PretrainedModel):
         config = config or self.config
         use_te = config.transformer_impl == "transformer_engine"
         if config.hf_model_type == "glm4_moe":
-            config.moe_layer_freq = [0] + [1] * (config.num_layers - 1)
+            config.moe_layer_freq = [0] + [1] * (config.num_layers - 1) #FIXME
         if config.num_moe_experts:
             transformer_block_spec = get_gpt_decoder_block_spec(config, use_transformer_engine=use_te)
             if not use_te and config.normalization == "RMSNorm":
@@ -306,8 +309,6 @@ class McaGPTModel(GPTModel, PretrainedModel):
                     if config.hf_model_type == "glm4_moe":
                         config.moe_shared_expert_intermediate_size = 1408 # hard code here # FIXME
                         config.moe_router_enable_expert_bias = True
-                        # add spec for first layer
-                        
                     else: # for qwen2_moe
                         transformer_layer_spec.submodules.mlp.submodules.shared_experts.params["gate"] = config.moe_use_shared_expert_gate
 
