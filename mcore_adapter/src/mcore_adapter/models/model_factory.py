@@ -260,6 +260,14 @@ class McaGPTModel(GPTModel, PretrainedModel):
 
     def __init__(self, config: "McaModelConfig", **kwargs):
         transformer_layer_spec = self._get_transformer_layer_spec(config)
+        # here we need to specific ops for glm4moe
+        if config.hf_model_type == "glm4_moe":
+            from megatron.core.transformer.identity_op import IdentityOp
+            from megatron.core.extensions.transformer_engine import TENorm
+            first_layer = transformer_layer_spec[0]
+            if getattr(first_layer.submodules, "pre_mlp_layernorm", None) == IdentityOp:
+                logger.info("replacing the norm weight in the first layer...")
+                setattr(first_layer.submodules, "pre_mlp_layernorm", TENorm) # patch
         pre_process = kwargs.pop("pre_process", mpu.is_pipeline_first_stage())
         post_process = kwargs.pop("post_process", mpu.is_pipeline_last_stage())
         super().__init__(
@@ -298,6 +306,8 @@ class McaGPTModel(GPTModel, PretrainedModel):
                     if config.hf_model_type == "glm4_moe":
                         config.moe_shared_expert_intermediate_size = 1408 # hard code here # FIXME
                         config.moe_router_enable_expert_bias = True
+                        # add spec for first layer
+                        
                     else: # for qwen2_moe
                         transformer_layer_spec.submodules.mlp.submodules.shared_experts.params["gate"] = config.moe_use_shared_expert_gate
 
