@@ -52,11 +52,13 @@ class VirtualModels:
 
     def load_state_dict(self, state_dict: Dict[str, torch.Tensor], strict: bool = True):
         if len(self.models) == 1:
+            print(state_dict.keys())
             if "model" in state_dict:
                 state_dict = state_dict["model"]
             return self.models[0].load_state_dict(state_dict, strict=strict)
         all_missing_keys, all_unexpected_keys = [], []
         for i, model in enumerate(self.models):
+            print(state_dict[f"model{i}"]).keys()
             ret = model.load_state_dict(state_dict[f"model{i}"], strict=strict)
             if not strict:
                 all_missing_keys.extend(ret[0])
